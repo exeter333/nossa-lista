@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2f5d50">
+  <title>Itens vistos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Figtree:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #eef2ee;
+      --surface: #ffffff;
+      --ink: #1c2a25;
+      --muted: #66746e;
+      --line: #d5ddd7;
+      --accent: #2f5d50;
+      --accent-ink: #ffffff;
+      --danger: #a4372b;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #141b18;
+        --surface: #1d2622;
+        --ink: #e6efe9;
+        --muted: #8d9c95;
+        --line: #2f3b36;
+        --accent: #7fc2ab;
+        --accent-ink: #10201a;
+        --danger: #e07a6c;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    html,
+    body {
+      margin: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.5 "Figtree", system-ui, sans-serif;
+      padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0);
+    }
+
+    main {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 28px 18px 80px;
+    }
+
+    h1 {
+      font: 700 2rem/1.1 "Bricolage Grotesque", system-ui, sans-serif;
+      margin: 0 0 4px;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: .9rem;
+      margin: 0 0 20px;
+      display: flex;
+      gap: 6px 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--muted);
+      display: inline-block;
+      flex: none;
+    }
+
+    .dot.on {
+      background: var(--accent);
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .linha {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .grupo {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .rotulo {
+      font-size: .85rem;
+      color: var(--muted);
+      min-width: 6.2rem;
+    }
+
+    .chip {
+      border: 1.5px solid var(--c, var(--line));
+      background: transparent;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 4px 13px;
+      font-size: .92rem;
+      font-weight: 500;
+    }
+
+    .chip[aria-pressed="true"] {
+      background: var(--c, var(--accent));
+      color: var(--on, var(--accent-ink));
+      font-weight: 600;
+    }
+
+    ul.itens {
+      list-style: none;
+      margin: 18px 0 0;
+      padding: 0;
+      background: var(--surface);
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    ul.itens li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 8px 10px 14px;
+      border-bottom: 1px solid var(--line);
+      border-left: 6px solid var(--c);
+      background: var(--surface);
+      background: color-mix(in srgb, var(--c) 17%, var(--surface));
+    }
+
+    ul.itens li:last-child {
+      border-bottom: 0;
+    }
+
+    .corpo {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .texto {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    .dono {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dono i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--c);
+      display: inline-block;
+    }
+
+    .pill {
+      border: 1px solid var(--muted);
+      border-radius: 999px;
+      padding: 0 8px;
+      color: var(--ink);
+    }
+
+    .del {
+      background: none;
+      border: 0;
+      color: var(--muted);
+      font-size: 1.3rem;
+      line-height: 1;
+      padding: 6px 8px;
+      border-radius: 8px;
+    }
+
+    .del:hover {
+      color: var(--danger);
+    }
+
+    .link {
+      background: none;
+      border: 0;
+      color: var(--accent);
+      font-weight: 600;
+      padding: 6px 4px;
+      font-size: inherit;
+    }
+
+    a.link {
+      text-decoration: none;
+      padding-left: 0;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 28px 16px;
+    }
+
+    .msg {
+      background: var(--surface);
+      border: 1.5px solid var(--danger);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      color: var(--danger);
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>Itens vistos</h1>
+    <p class="sub">
+      <a class="link" id="voltar" href="index.html">← Voltar para a lista</a>
+      <span><span class="dot" id="dot"></span> <span id="status">Conectando…</span></span>
+    </p>
+
+    <div class="msg" id="erro"></div>
+
+    <div class="linha" role="group" aria-label="Filtrar por pessoa">
+      <span class="rotulo">Mostrar de:</span>
+      <span class="grupo" id="filDono"></span>
+    </div>
+    <div class="linha" id="linhaFilExtra" role="group" aria-label="Filtrar por etiqueta" hidden>
+      <span class="rotulo">Com etiqueta:</span>
+      <span class="grupo" id="filExtra"></span>
+    </div>
+
+    <ul class="itens" id="lista"></ul>
+    <p class="empty" id="vazio" hidden></p>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      initializeFirestore, collection, doc, deleteDoc, onSnapshot, query, writeBatch, deleteField
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCf41LltqqwYfoqztr1crdjDEdFIYFcWw4",
+      authDomain: "lista-compartilhada-968f3.firebaseapp.com",
+      projectId: "lista-compartilhada-968f3",
+      storageBucket: "lista-compartilhada-968f3.firebasestorage.app",
+      messagingSenderId: "1018696660438",
+      appId: "1:1018696660438:web:417135cb69c1b81cd56077"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+
+    const $ = (id) => document.getElementById(id);
+    const mostrarErro = (t) => { $("erro").textContent = t; $("erro").style.display = "block"; };
+
+    const listaId = new URLSearchParams(location.search).get("lista");
+    if (!listaId) {
+      mostrarErro("Abra esta página pelo link \"Ver itens vistos\" da lista, para ela saber qual lista mostrar.");
+      $("status").textContent = "Sem lista";
+    } else if (firebaseConfig.apiKey === "COLE_AQUI") {
+      mostrarErro("Configure o Firebase: cole o seu firebaseConfig no início do script deste arquivo.");
+      $("status").textContent = "Sem configuração";
+    } else {
+      iniciar();
+    }
+
+    function iniciar() {
+      $("voltar").href = "index.html?lista=" + encodeURIComponent(listaId);
+      const db = initializeFirestore(initializeApp(firebaseConfig), { experimentalAutoDetectLongPolling: true });
+      const itensCol = collection(db, "listas", listaId, "itens");
+      const vistosCol = collection(db, "listas", listaId, "vistos");
+      const tagsCol = collection(db, "listas", listaId, "tags");
+
+      let tags = [], vistos = [];
+      let filtroDono = "todos", filtroExtra = "todas";
+
+      const donos = () => tags.filter((t) => t.padrao);
+      const extras = () => tags.filter((t) => !t.padrao);
+
+      function textoSobre(hex) {
+        const n = parseInt(hex.slice(1), 16);
+        const lum = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+        return lum > 0.62 ? "#1c2a25" : "#ffffff";
+      }
+      const marcar = (el, hex) => { el.style.setProperty("--c", hex); el.style.setProperty("--on", textoSobre(hex)); };
+
+      const donoDe = (item) =>
+        donos().find((t) => t.id === item.tag) ||
+        (item.autor && donos().find((t) => t.nome.toLowerCase() === item.autor.toLowerCase())) || null;
+      const extraIdDe = (item) => {
+        if (item.extra) return item.extra;
+        if (item.tag && !donos().some((t) => t.id === item.tag)) return item.tag;
+        return null;
+      };
+      const extraDe = (item) => extras().find((t) => t.id === extraIdDe(item)) || null;
+
+      const quando = (v) => (v && v.toMillis ? v.toMillis() : Date.now());
+
+      onSnapshot(query(tagsCol), (snap) => {
+        tags = snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+        if (filtroDono !== "todos" && !donos().some((t) => t.id === filtroDono)) filtroDono = "todos";
+        if (filtroExtra !== "todas" && !extras().some((t) => t.id === filtroExtra)) filtroExtra = "todas";
+        desenharFiltros(); desenharItens();
+      }, (e) => mostrarErro("Não foi possível ler as etiquetas (" + e.code + ")."));
+
+      onSnapshot(query(vistosCol), { includeMetadataChanges: true }, (snap) => {
+        $("dot").classList.toggle("on", !snap.metadata.fromCache);
+        $("status").textContent = snap.metadata.fromCache ? "Offline, será sincronizado" : "Sincronizado";
+        vistos = snap.docs
+          .map((d) => ({ id: d.id, ...d.data({ serverTimestamps: "estimate" }) }))
+          .sort((a, b) => quando(b.vistoEm) - quando(a.vistoEm));   // mais recentes primeiro
+        desenharItens();
+      }, (e) => {
+        $("status").textContent = "Erro de conexão";
+        mostrarErro("Não foi possível ler os itens vistos (" + e.code + "). Verifique as regras do Firestore.");
+      });
+
+      function chip(texto, hex, ativo, onclick) {
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "chip"; b.textContent = texto;
+        b.setAttribute("aria-pressed", ativo ? "true" : "false");
+        if (hex) marcar(b, hex);
+        b.onclick = onclick;
+        return b;
+      }
+
+      function desenharFiltros() {
+        const D = donos(), E = extras();
+        const fd = $("filDono"); fd.innerHTML = "";
+        fd.append(chip("Todos", null, filtroDono === "todos", () => { filtroDono = "todos"; desenharFiltros(); desenharItens(); }));
+        for (const t of D) fd.append(chip(t.nome, t.cor, filtroDono === t.id, () => { filtroDono = t.id; desenharFiltros(); desenharItens(); }));
+        $("linhaFilExtra").hidden = E.length === 0;
+        const fe = $("filExtra"); fe.innerHTML = "";
+        fe.append(chip("Todas", null, filtroExtra === "todas", () => { filtroExtra = "todas"; desenharFiltros(); desenharItens(); }));
+        for (const t of E) fe.append(chip(t.nome, null, filtroExtra === t.id, () => { filtroExtra = t.id; desenharFiltros(); desenharItens(); }));
+      }
+
+      // Devolve o item para a lista principal, na mesma posição de antes
+      async function devolver(item) {
+        const { id, vistoEm, ...dados } = item;
+        const batch = writeBatch(db);
+        batch.set(doc(itensCol, id), { ...dados, feito: false });
+        batch.delete(doc(vistosCol, id));
+        try { await batch.commit(); }
+        catch (err) { mostrarErro("Não foi possível devolver o item (" + err.code + ")."); }
+      }
+
+      function desenharItens() {
+        const lista = vistos.filter((i) =>
+          (filtroDono === "todos" || (donoDe(i) && donoDe(i).id === filtroDono)) &&
+          (filtroExtra === "todas" || extraIdDe(i) === filtroExtra));
+        const ul = $("lista"); ul.innerHTML = "";
+        $("vazio").hidden = lista.length > 0;
+        $("vazio").textContent = vistos.length ? "Nenhum item com esse filtro." : "Nenhum item visto ainda. Marque itens na lista e use \"Mover marcados para visto\".";
+        ul.hidden = lista.length === 0;
+
+        for (const item of lista) {
+          const dono = donoDe(item), extra = extraDe(item);
+          const li = document.createElement("li");
+          li.style.setProperty("--c", dono ? dono.cor : "#9aa7a1");
+
+          const corpo = document.createElement("div"); corpo.className = "corpo";
+          const txt = document.createElement("span"); txt.className = "texto"; txt.textContent = item.texto;
+          corpo.append(txt);
+
+          const meta = document.createElement("span"); meta.className = "meta";
+          const nomeDono = dono ? dono.nome : item.autor;
+          if (nomeDono) {
+            const d = document.createElement("span"); d.className = "dono";
+            d.append(document.createElement("i"), document.createTextNode(nomeDono));
+            meta.append(d);
+          }
+          if (extra) {
+            const p = document.createElement("span"); p.className = "pill"; p.textContent = extra.nome;
+            meta.append(p);
+          }
+          if (item.vistoEm && item.vistoEm.toDate) {
+            const dt = document.createElement("span");
+            dt.textContent = "Visto em " + item.vistoEm.toDate().toLocaleDateString("pt-BR");
+            meta.append(dt);
+          }
+          corpo.append(meta);
+
+          const volta = document.createElement("button");
+          volta.className = "link"; volta.type = "button"; volta.textContent = "Devolver";
+          volta.setAttribute("aria-label", "Devolver " + item.texto + " para a lista");
+          volta.onclick = () => devolver(item);
+
+          const del = document.createElement("button");
+          del.className = "del"; del.type = "button"; del.textContent = "×";
+          del.setAttribute("aria-label", "Excluir " + item.texto + " do registro");
+          del.onclick = () => { if (confirm("Excluir \"" + item.texto + "\" do registro? Isso não pode ser desfeito.")) deleteDoc(doc(vistosCol, item.id)); };
+
+          li.append(corpo, volta, del);
+          ul.append(li);
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>

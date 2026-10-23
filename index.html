@@ -301,6 +301,10 @@
       color: var(--danger);
     }
 
+    a.link {
+      text-decoration: none;
+    }
+
     .msg {
       background: var(--surface);
       border: 1.5px solid var(--danger);
@@ -375,6 +379,7 @@
     <p class="sub">
       <span><span class="dot" id="dot"></span> <span id="status">Conectando…</span></span>
       <button class="link" id="copiar" type="button">Copiar link da lista</button>
+      <a class="link" id="irVisto" href="visto.html">Ver itens vistos</a>
     </p>
 
     <div class="msg" id="erro"></div>
@@ -405,7 +410,7 @@
     <p class="empty" id="vazio" hidden></p>
 
     <div class="tools">
-      <button class="link warn" id="limpar" type="button">Remover itens concluídos</button>
+      <button class="link" id="limpar" type="button">Mover marcados para visto</button>
     </div>
 
     <details id="painel">
@@ -701,14 +706,25 @@
         } catch (err) { mostrarErro("Não foi possível criar a etiqueta (" + err.code + ")."); }
       });
 
-      // ---- Remover concluídos ----
+      // ---- Mover marcados para a lista de vistos ----
+      const vistosCol = collection(db, "listas", listaId, "vistos");
+      $("irVisto").href = "visto.html?lista=" + encodeURIComponent(listaId);
+
       $("limpar").addEventListener("click", async () => {
-        const feitos = await getDocs(query(itensCol, where("feito", "==", true)));
-        if (feitos.empty) return;
-        if (!confirm("Remover " + feitos.size + " item(ns) concluído(s)?")) return;
-        const batch = writeBatch(db);
-        feitos.forEach((d) => batch.delete(d.ref));
-        await batch.commit();
+        try {
+          const marcados = await getDocs(query(itensCol, where("feito", "==", true)));
+          if (marcados.empty) return alert("Nenhum item marcado.");
+          if (!confirm("Mover " + marcados.size + " item(ns) marcado(s) para a lista de vistos?")) return;
+          const docs = marcados.docs;
+          for (let i = 0; i < docs.length; i += 200) {   // limite de 500 operações por lote
+            const batch = writeBatch(db);
+            for (const d of docs.slice(i, i + 200)) {
+              batch.set(doc(vistosCol, d.id), { ...d.data(), vistoEm: serverTimestamp() });
+              batch.delete(d.ref);
+            }
+            await batch.commit();
+          }
+        } catch (err) { mostrarErro("Não foi possível mover os itens (" + err.code + ")."); }
       });
     }
   </script>
