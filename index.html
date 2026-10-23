@@ -370,11 +370,64 @@
     form.nova-tag input[type=text] {
       padding: 9px 12px;
     }
+
+    .gate {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .gate form {
+      width: 100%;
+      max-width: 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .gate h1 {
+      margin-bottom: 0;
+    }
+
+    .gate p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .gate input[type=password] {
+      font: inherit;
+      color: var(--ink);
+      background: var(--surface);
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 14px;
+      width: 100%;
+    }
+
+    .gate .add {
+      padding: 12px 18px;
+    }
+
+    .gate .erro-senha {
+      color: var(--danger);
+      font-size: .9rem;
+    }
   </style>
 </head>
 
 <body>
-  <main>
+  <div class="gate" id="gate">
+    <form id="gateForm" autocomplete="off">
+      <h1>Lista compartilhada</h1>
+      <p>Digite a senha para entrar.</p>
+      <input type="password" id="senha" placeholder="Senha" aria-label="Senha" autocomplete="current-password" required>
+      <button class="add" type="submit">Entrar</button>
+      <p class="erro-senha" id="erroSenha" role="alert" hidden></p>
+    </form>
+  </div>
+  <main id="app" hidden>
     <h1>Lista compartilhada</h1>
     <p class="sub">
       <span><span class="dot" id="dot"></span> <span id="status">Conectando…</span></span>
@@ -449,13 +502,9 @@
     const $ = (id) => document.getElementById(id);
     const mostrarErro = (t) => { $("erro").textContent = t; $("erro").style.display = "block"; };
 
-    const params = new URLSearchParams(location.search);
-    let listaId = params.get("lista");
-    if (!listaId) {
-      listaId = "lista-" + Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 8);
-      params.set("lista", listaId);
-      history.replaceState(null, "", "?" + params.toString());
-    }
+    // Lista única: o mesmo código em todos os aparelhos, sempre a mesma lista.
+    // Para manter itens que você já criou, troque pelo código antigo (o valor depois de ?lista= na URL).
+    const listaId = "rebecca-jose-k7x29qpl";
 
     $("copiar").addEventListener("click", async () => {
       try { await navigator.clipboard.writeText(location.href); $("copiar").textContent = "Link copiado"; }
@@ -463,11 +512,46 @@
       setTimeout(() => ($("copiar").textContent = "Copiar link da lista"), 2000);
     });
 
-    if (firebaseConfig.apiKey === "COLE_AQUI") {
-      mostrarErro("Configure o Firebase: cole o seu firebaseConfig no início do script deste arquivo.");
-      $("status").textContent = "Sem configuração";
+    // ---- Tela de senha ----
+    // Guardamos só o hash da senha (SHA-256), não a senha em si.
+    const SENHA_HASH = "44c4289ed94917db9ea4815c20b1211edb41fb2a28f0e0a466503df762ba2609";
+    async function hashDe(t) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("lista-v1:" + t));
+      return [...new Uint8Array(buf)].map((x) => x.toString(16).padStart(2, "0")).join("");
+    }
+    function abrirApp() {
+      $("gate").hidden = true;
+      $("app").hidden = false;
+      if (firebaseConfig.apiKey === "COLE_AQUI") {
+        mostrarErro("Configure o Firebase: cole o seu firebaseConfig no início do script deste arquivo.");
+        $("status").textContent = "Sem configuração";
+      } else {
+        iniciar();
+      }
+    }
+    let jaEntrou = false;
+    try { jaEntrou = sessionStorage.getItem("lista:ok") === SENHA_HASH; } catch { }
+    if (jaEntrou) {
+      abrirApp();
     } else {
-      iniciar();
+      $("senha").focus();
+      $("gateForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const erro = $("erroSenha");
+        if (!(window.crypto && crypto.subtle)) {
+          erro.textContent = "Este navegador não permite verificar a senha. Abra o site pelo endereço https.";
+          erro.hidden = false;
+          return;
+        }
+        if ((await hashDe($("senha").value)) === SENHA_HASH) {
+          try { sessionStorage.setItem("lista:ok", SENHA_HASH); } catch { }
+          abrirApp();
+        } else {
+          erro.textContent = "Senha incorreta.";
+          erro.hidden = false;
+          $("senha").select();
+        }
+      });
     }
 
     function iniciar() {
@@ -708,7 +792,6 @@
 
       // ---- Mover marcados para a lista de vistos ----
       const vistosCol = collection(db, "listas", listaId, "vistos");
-      $("irVisto").href = "visto.html?lista=" + encodeURIComponent(listaId);
 
       $("limpar").addEventListener("click", async () => {
         try {
