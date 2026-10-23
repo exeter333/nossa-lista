@@ -278,13 +278,13 @@
   </main>
 
   <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
-      getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
-      onSnapshot, query, orderBy, serverTimestamp, writeBatch, getDocs, where
+      initializeFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
+      onSnapshot, query, serverTimestamp, writeBatch, getDocs, where
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
 
+    // ====== COLE AQUI A SUA CONFIGURAÇÃO DO FIREBASE ======
     // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCf41LltqqwYfoqztr1crdjDEdFIYFcWw4",
