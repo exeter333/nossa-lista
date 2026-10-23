@@ -11,6 +11,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Figtree:wght@400;500;600&display=swap"
     rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
   <style>
     :root {
       --bg: #eef2ee;
@@ -21,6 +22,7 @@
       --accent: #2f5d50;
       --accent-ink: #ffffff;
       --danger: #a4372b;
+      --drag: #e3ece6;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -33,6 +35,7 @@
         --accent: #7fc2ab;
         --accent-ink: #10201a;
         --danger: #e07a6c;
+        --drag: #29362f;
       }
     }
 
@@ -68,7 +71,7 @@
       font-size: .9rem;
       margin: 0 0 22px;
       display: flex;
-      gap: 10px;
+      gap: 6px 14px;
       align-items: center;
       flex-wrap: wrap;
     }
@@ -134,13 +137,29 @@
     li {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 14px;
+      gap: 10px;
+      padding: 10px 12px 10px 4px;
       border-bottom: 1px solid var(--line);
+      background: var(--surface);
     }
 
     li:last-child {
       border-bottom: 0;
+    }
+
+    .grip {
+      flex: none;
+      width: 34px;
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 1.2rem;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
     li input[type=checkbox] {
@@ -151,12 +170,23 @@
       cursor: pointer;
     }
 
-    li span {
+    .corpo {
       flex: 1;
+      min-width: 0;
+    }
+
+    .texto {
+      display: block;
       overflow-wrap: anywhere;
     }
 
-    li.done span {
+    .autor {
+      display: block;
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    li.done .texto {
       text-decoration: line-through;
       color: var(--muted);
     }
@@ -173,6 +203,15 @@
 
     .del:hover {
       color: var(--danger);
+    }
+
+    .sortable-ghost {
+      background: var(--drag);
+      opacity: .7;
+    }
+
+    .sortable-chosen {
+      cursor: grabbing;
     }
 
     .empty {
@@ -195,6 +234,7 @@
       color: var(--accent);
       font-weight: 600;
       padding: 6px 0;
+      font-size: inherit;
     }
 
     .link.warn {
@@ -215,10 +255,11 @@
 
 <body>
   <main>
-    <h1 id="titulo">Lista compartilhada</h1>
+    <h1>Lista compartilhada</h1>
     <p class="sub">
       <span><span class="dot" id="dot"></span> <span id="status">Conectando…</span></span>
       <button class="link" id="copiar" type="button">Copiar link da lista</button>
+      <button class="link" id="nome" type="button"></button>
     </p>
 
     <div class="msg" id="erro"></div>
@@ -262,7 +303,25 @@
     const erro = $("erro");
     const mostrarErro = (t) => { erro.textContent = t; erro.style.display = "block"; };
 
-    // Código da lista: vem da URL (?lista=codigo). Se não existir, cria um e grava na URL.
+    // ---- Nome de quem usa este aparelho (guardado só neste navegador) ----
+    let meuNome = "";
+    try { meuNome = localStorage.getItem("lista:nome") || ""; } catch { }
+    function pedirNome() {
+      const n = (prompt("Seu nome (aparece nos itens que você adicionar):", meuNome) || "").trim().slice(0, 30);
+      if (n) {
+        meuNome = n;
+        try { localStorage.setItem("lista:nome", n); } catch { }
+      }
+      atualizarBotaoNome();
+    }
+    function atualizarBotaoNome() {
+      $("nome").textContent = meuNome ? "Você: " + meuNome + " (trocar)" : "Definir meu nome";
+    }
+    atualizarBotaoNome();
+    $("nome").addEventListener("click", pedirNome);
+    if (!meuNome) setTimeout(pedirNome, 300);
+
+    // ---- Código da lista na URL ----
     const params = new URLSearchParams(location.search);
     let listaId = params.get("lista");
     if (!listaId) {
@@ -279,16 +338,33 @@
     }
 
     function iniciar() {
-      const db = getFirestore(initializeApp(firebaseConfig));
+      const db = initializeFirestore(initializeApp(firebaseConfig), {
+        experimentalAutoDetectLongPolling: true
+      });
       const itens = collection(db, "listas", listaId, "itens");
 
+      let atual = [];        // itens na ordem exibida
+      let arrastando = false;
+      let pendente = null;   // atualização recebida durante o arraste
+
+      // Posição de cada item: campo "ordem"; itens antigos usam a data de criação.
+      const posicao = (d) => {
+        if (typeof d.ordem === "number") return d.ordem;
+        if (d.criadoEm && d.criadoEm.toMillis) return d.criadoEm.toMillis();
+        return Date.now();
+      };
+
       onSnapshot(
-        query(itens, orderBy("criadoEm", "asc")),
+        query(itens),
         { includeMetadataChanges: true },
         (snap) => {
           $("dot").classList.toggle("on", !snap.metadata.fromCache);
           $("status").textContent = snap.metadata.fromCache ? "Offline, será sincronizado" : "Sincronizado";
-          desenhar(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+          const lista = snap.docs
+            .map((d) => { const v = d.data({ serverTimestamps: "estimate" }); return { id: d.id, ...v, _pos: posicao(v) }; })
+            .sort((a, b) => a._pos - b._pos);
+          if (arrastando) { pendente = lista; return; }
+          desenhar(lista);
         },
         (e) => {
           $("status").textContent = "Erro de conexão";
@@ -297,13 +373,21 @@
       );
 
       function desenhar(lista) {
+        atual = lista;
         const ul = $("lista");
         ul.innerHTML = "";
         $("vazio").hidden = lista.length > 0;
         ul.hidden = lista.length === 0;
         for (const item of lista) {
           const li = document.createElement("li");
+          li.dataset.id = item.id;
           if (item.feito) li.className = "done";
+
+          const grip = document.createElement("span");
+          grip.className = "grip";
+          grip.textContent = "⋮⋮";
+          grip.setAttribute("aria-hidden", "true");
+          grip.title = "Arraste para reordenar";
 
           const cb = document.createElement("input");
           cb.type = "checkbox";
@@ -311,8 +395,18 @@
           cb.setAttribute("aria-label", "Marcar " + item.texto);
           cb.onchange = () => updateDoc(doc(itens, item.id), { feito: cb.checked });
 
+          const corpo = document.createElement("div");
+          corpo.className = "corpo";
           const txt = document.createElement("span");
+          txt.className = "texto";
           txt.textContent = item.texto;
+          corpo.append(txt);
+          if (item.autor) {
+            const a = document.createElement("span");
+            a.className = "autor";
+            a.textContent = "Adicionado por " + item.autor;
+            corpo.append(a);
+          }
 
           const del = document.createElement("button");
           del.className = "del";
@@ -321,18 +415,57 @@
           del.setAttribute("aria-label", "Remover " + item.texto);
           del.onclick = () => deleteDoc(doc(itens, item.id));
 
-          li.append(cb, txt, del);
+          li.append(grip, cb, corpo, del);
           ul.append(li);
         }
       }
+
+      // ---- Reordenar arrastando (funciona com mouse e toque) ----
+      Sortable.create($("lista"), {
+        handle: ".grip",
+        animation: 150,
+        ghostClass: "sortable-ghost",
+        onStart: () => { arrastando = true; },
+        onEnd: async (ev) => {
+          arrastando = false;
+          const fim = () => { if (pendente) { desenhar(pendente); pendente = null; } };
+          if (ev.oldIndex === ev.newIndex) return fim();
+
+          // Só o item movido recebe uma nova posição, entre os dois vizinhos.
+          const ids = [...$("lista").children].map((li) => li.dataset.id);
+          const i = ids.indexOf(ev.item.dataset.id);
+          const mapa = new Map(atual.map((x) => [x.id, x._pos]));
+          const antes = i > 0 ? mapa.get(ids[i - 1]) : null;
+          const depois = i < ids.length - 1 ? mapa.get(ids[i + 1]) : null;
+          let nova;
+          if (antes === null && depois === null) return fim();
+          else if (antes === null) nova = depois - 1000;
+          else if (depois === null) nova = antes + 1000;
+          else nova = (antes + depois) / 2;
+
+          try {
+            await updateDoc(doc(itens, ev.item.dataset.id), { ordem: nova });
+          } catch (err) {
+            mostrarErro("Não foi possível reordenar (" + err.code + ").");
+          }
+          fim();
+        }
+      });
 
       $("form").addEventListener("submit", async (e) => {
         e.preventDefault();
         const texto = $("novo").value.trim();
         if (!texto) return;
+        if (!meuNome) pedirNome();
         $("novo").value = "";
         try {
-          await addDoc(itens, { texto, feito: false, criadoEm: serverTimestamp() });
+          await addDoc(itens, {
+            texto,
+            autor: meuNome || "",
+            feito: false,
+            ordem: Date.now(),      // novos itens entram no fim da lista
+            criadoEm: serverTimestamp()
+          });
         } catch (err) {
           mostrarErro("Não foi possível adicionar o item (" + err.code + ").");
         }
