@@ -22,7 +22,6 @@
       --accent: #2f5d50;
       --accent-ink: #ffffff;
       --danger: #a4372b;
-      --drag: #e3ece6;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -35,12 +34,15 @@
         --accent: #7fc2ab;
         --accent-ink: #10201a;
         --danger: #e07a6c;
-        --drag: #29362f;
       }
     }
 
     * {
       box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
     }
 
     html,
@@ -69,7 +71,7 @@
     .sub {
       color: var(--muted);
       font-size: .9rem;
-      margin: 0 0 22px;
+      margin: 0 0 20px;
       display: flex;
       gap: 6px 14px;
       align-items: center;
@@ -82,16 +84,63 @@
       border-radius: 50%;
       background: var(--muted);
       display: inline-block;
+      flex: none;
     }
 
     .dot.on {
       background: var(--accent);
     }
 
-    form {
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .linha {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .grupo {
       display: flex;
       gap: 8px;
-      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .rotulo {
+      font-size: .85rem;
+      color: var(--muted);
+      min-width: 6.2rem;
+    }
+
+    .chip {
+      border: 1.5px solid var(--c, var(--line));
+      background: transparent;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 4px 13px;
+      font-size: .92rem;
+      font-weight: 500;
+    }
+
+    .chip[aria-pressed="true"] {
+      background: var(--c, var(--accent));
+      color: var(--on, var(--accent-ink));
+      font-weight: 600;
+    }
+
+    form.novo {
+      display: flex;
+      gap: 8px;
+      margin: 4px 0 20px;
     }
 
     input[type=text] {
@@ -105,11 +154,6 @@
       padding: 12px 14px;
     }
 
-    button {
-      font: inherit;
-      cursor: pointer;
-    }
-
     .add {
       background: var(--accent);
       color: var(--accent-ink);
@@ -119,12 +163,7 @@
       font-weight: 600;
     }
 
-    :focus-visible {
-      outline: 3px solid var(--accent);
-      outline-offset: 2px;
-    }
-
-    ul {
+    ul.itens {
       list-style: none;
       margin: 0;
       padding: 0;
@@ -134,22 +173,24 @@
       overflow: hidden;
     }
 
-    li {
+    ul.itens li {
       display: flex;
       align-items: center;
       gap: 10px;
       padding: 10px 12px 10px 4px;
       border-bottom: 1px solid var(--line);
+      border-left: 6px solid var(--c);
       background: var(--surface);
+      background: color-mix(in srgb, var(--c) 17%, var(--surface));
     }
 
-    li:last-child {
+    ul.itens li:last-child {
       border-bottom: 0;
     }
 
     .grip {
       flex: none;
-      width: 34px;
+      width: 32px;
       align-self: stretch;
       display: flex;
       align-items: center;
@@ -180,10 +221,34 @@
       overflow-wrap: anywhere;
     }
 
-    .autor {
-      display: block;
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
       font-size: .8rem;
       color: var(--muted);
+    }
+
+    .dono {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dono i {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--c);
+      display: inline-block;
+    }
+
+    .pill {
+      border: 1px solid var(--muted);
+      border-radius: 999px;
+      padding: 0 8px;
+      color: var(--ink);
     }
 
     li.done .texto {
@@ -206,12 +271,7 @@
     }
 
     .sortable-ghost {
-      background: var(--drag);
-      opacity: .7;
-    }
-
-    .sortable-chosen {
-      cursor: grabbing;
+      opacity: .55;
     }
 
     .empty {
@@ -250,6 +310,62 @@
       color: var(--danger);
       display: none;
     }
+
+    details {
+      margin-top: 22px;
+      background: var(--surface);
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 4px 14px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      padding: 10px 0;
+    }
+
+    .sec {
+      font-size: .85rem;
+      color: var(--muted);
+      margin: 8px 0 2px;
+    }
+
+    .tag-linha {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .tag-linha .nome {
+      flex: 1;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    input[type=color] {
+      width: 40px;
+      height: 34px;
+      padding: 2px;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    form.nova-tag {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 12px 0 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    form.nova-tag input[type=text] {
+      padding: 9px 12px;
+    }
   </style>
 </head>
 
@@ -259,33 +375,60 @@
     <p class="sub">
       <span><span class="dot" id="dot"></span> <span id="status">Conectando…</span></span>
       <button class="link" id="copiar" type="button">Copiar link da lista</button>
-      <button class="link" id="nome" type="button"></button>
     </p>
 
     <div class="msg" id="erro"></div>
 
-    <form id="form" autocomplete="off">
+    <div class="linha" role="group" aria-label="Quem adiciona o item">
+      <span class="rotulo">Novo item de:</span>
+      <span class="grupo" id="selDono"></span>
+    </div>
+    <div class="linha" id="linhaExtra" role="group" aria-label="Etiqueta opcional" hidden>
+      <span class="rotulo">Etiqueta (opcional):</span>
+      <span class="grupo" id="selExtra"></span>
+    </div>
+    <form class="novo" id="form" autocomplete="off">
       <input type="text" id="novo" placeholder="Adicionar item" maxlength="200" aria-label="Novo item" required>
       <button class="add" type="submit">Adicionar</button>
     </form>
 
-    <ul id="lista"></ul>
-    <p class="empty" id="vazio" hidden>A lista está vazia. Adicione o primeiro item.</p>
+    <div class="linha" role="group" aria-label="Filtrar por pessoa">
+      <span class="rotulo">Mostrar de:</span>
+      <span class="grupo" id="filDono"></span>
+    </div>
+    <div class="linha" id="linhaFilExtra" role="group" aria-label="Filtrar por etiqueta" hidden>
+      <span class="rotulo">Com etiqueta:</span>
+      <span class="grupo" id="filExtra"></span>
+    </div>
+
+    <ul class="itens" id="lista"></ul>
+    <p class="empty" id="vazio" hidden></p>
 
     <div class="tools">
       <button class="link warn" id="limpar" type="button">Remover itens concluídos</button>
     </div>
+
+    <details id="painel">
+      <summary>Cores e etiquetas</summary>
+      <p class="sec">Cor de cada pessoa (vale para todos os itens)</p>
+      <div id="cores"></div>
+      <p class="sec">Etiquetas extras</p>
+      <div id="extras"></div>
+      <form class="nova-tag" id="formTag" autocomplete="off">
+        <input type="text" id="nomeNova" placeholder="Nova etiqueta" maxlength="24" aria-label="Nome da nova etiqueta"
+          required>
+        <button class="add" type="submit" style="padding:9px 16px">Criar</button>
+      </form>
+    </details>
   </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import {
-      initializeFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
+      initializeFirestore, collection, addDoc, setDoc, updateDoc, deleteDoc, doc,
       onSnapshot, query, serverTimestamp, writeBatch, getDocs, where
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // ====== COLE AQUI A SUA CONFIGURAÇÃO DO FIREBASE ======
-    // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCf41LltqqwYfoqztr1crdjDEdFIYFcWw4",
       authDomain: "lista-compartilhada-968f3.firebaseapp.com",
@@ -297,31 +440,10 @@
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    // =======================================================
 
     const $ = (id) => document.getElementById(id);
-    const erro = $("erro");
-    const mostrarErro = (t) => { erro.textContent = t; erro.style.display = "block"; };
+    const mostrarErro = (t) => { $("erro").textContent = t; $("erro").style.display = "block"; };
 
-    // ---- Nome de quem usa este aparelho (guardado só neste navegador) ----
-    let meuNome = "";
-    try { meuNome = localStorage.getItem("lista:nome") || ""; } catch { }
-    function pedirNome() {
-      const n = (prompt("Seu nome (aparece nos itens que você adicionar):", meuNome) || "").trim().slice(0, 30);
-      if (n) {
-        meuNome = n;
-        try { localStorage.setItem("lista:nome", n); } catch { }
-      }
-      atualizarBotaoNome();
-    }
-    function atualizarBotaoNome() {
-      $("nome").textContent = meuNome ? "Você: " + meuNome + " (trocar)" : "Definir meu nome";
-    }
-    atualizarBotaoNome();
-    $("nome").addEventListener("click", pedirNome);
-    if (!meuNome) setTimeout(pedirNome, 300);
-
-    // ---- Código da lista na URL ----
     const params = new URLSearchParams(location.search);
     let listaId = params.get("lista");
     if (!listaId) {
@@ -329,6 +451,12 @@
       params.set("lista", listaId);
       history.replaceState(null, "", "?" + params.toString());
     }
+
+    $("copiar").addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(location.href); $("copiar").textContent = "Link copiado"; }
+      catch { prompt("Copie o link da lista:", location.href); }
+      setTimeout(() => ($("copiar").textContent = "Copiar link da lista"), 2000);
+    });
 
     if (firebaseConfig.apiKey === "COLE_AQUI") {
       mostrarErro("Configure o Firebase: cole o seu firebaseConfig no início do script deste arquivo.");
@@ -338,103 +466,199 @@
     }
 
     function iniciar() {
-      const db = initializeFirestore(initializeApp(firebaseConfig), {
-        experimentalAutoDetectLongPolling: true
-      });
-      const itens = collection(db, "listas", listaId, "itens");
+      const db = initializeFirestore(initializeApp(firebaseConfig), { experimentalAutoDetectLongPolling: true });
+      const itensCol = collection(db, "listas", listaId, "itens");
+      const tagsCol = collection(db, "listas", listaId, "tags");
 
-      let atual = [];        // itens na ordem exibida
-      let arrastando = false;
-      let pendente = null;   // atualização recebida durante o arraste
+      let tags = [], itens = [], visiveis = [];
+      let filtroDono = "todos", filtroExtra = "todas";
+      let donoNovo = lembrado(), extraNovo = "";
+      let semeado = false, arrastando = false, pendente = false;
 
-      // Posição de cada item: campo "ordem"; itens antigos usam a data de criação.
+      function lembrado() { try { return localStorage.getItem("lista:dono") || ""; } catch { return ""; } }
+      function lembrar(id) { try { localStorage.setItem("lista:dono", id); } catch { } }
+
+      const donos = () => tags.filter((t) => t.padrao);   // Rebecca e José
+      const extras = () => tags.filter((t) => !t.padrao); // etiquetas opcionais
+
+      function textoSobre(hex) {
+        const n = parseInt(hex.slice(1), 16);
+        const lum = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+        return lum > 0.62 ? "#1c2a25" : "#ffffff";
+      }
+      const marcar = (el, hex) => { el.style.setProperty("--c", hex); el.style.setProperty("--on", textoSobre(hex)); };
+
       const posicao = (d) => {
         if (typeof d.ordem === "number") return d.ordem;
         if (d.criadoEm && d.criadoEm.toMillis) return d.criadoEm.toMillis();
         return Date.now();
       };
 
-      onSnapshot(
-        query(itens),
-        { includeMetadataChanges: true },
-        (snap) => {
-          $("dot").classList.toggle("on", !snap.metadata.fromCache);
-          $("status").textContent = snap.metadata.fromCache ? "Offline, será sincronizado" : "Sincronizado";
-          const lista = snap.docs
-            .map((d) => { const v = d.data({ serverTimestamps: "estimate" }); return { id: d.id, ...v, _pos: posicao(v) }; })
-            .sort((a, b) => a._pos - b._pos);
-          if (arrastando) { pendente = lista; return; }
-          desenhar(lista);
-        },
-        (e) => {
-          $("status").textContent = "Erro de conexão";
-          mostrarErro("Não foi possível ler a lista (" + e.code + "). Verifique as regras do Firestore e o firebaseConfig.");
-        }
-      );
+      // Dono do item (Rebecca ou José). Itens antigos com "autor" casam pelo nome.
+      const donoDe = (item) =>
+        donos().find((t) => t.id === item.tag) ||
+        (item.autor && donos().find((t) => t.nome.toLowerCase() === item.autor.toLowerCase())) || null;
 
-      function desenhar(lista) {
-        atual = lista;
-        const ul = $("lista");
-        ul.innerHTML = "";
-        $("vazio").hidden = lista.length > 0;
-        ul.hidden = lista.length === 0;
-        for (const item of lista) {
+      // Etiqueta extra do item. Itens da versão anterior guardavam a etiqueta customizada em "tag".
+      const extraIdDe = (item) => {
+        if (item.extra) return item.extra;
+        if (item.tag && !donos().some((t) => t.id === item.tag)) return item.tag;
+        return null;
+      };
+      const extraDe = (item) => extras().find((t) => t.id === extraIdDe(item)) || null;
+
+      // ---- Etiquetas ----
+      onSnapshot(query(tagsCol), { includeMetadataChanges: true }, (snap) => {
+        if (!snap.metadata.fromCache && snap.empty && !semeado) {
+          semeado = true;
+          setDoc(doc(tagsCol, "rebecca"), { nome: "Rebecca", cor: "#ec6fa3", padrao: true, ordem: 1 });
+          setDoc(doc(tagsCol, "jose"), { nome: "José", cor: "#4a8fe0", padrao: true, ordem: 2 });
+        }
+        tags = snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+        if (filtroDono !== "todos" && !donos().some((t) => t.id === filtroDono)) filtroDono = "todos";
+        if (filtroExtra !== "todas" && !extras().some((t) => t.id === filtroExtra)) filtroExtra = "todas";
+        if (extraNovo && !extras().some((t) => t.id === extraNovo)) extraNovo = "";
+        if (!donos().some((t) => t.id === donoNovo) && donos().length) donoNovo = donos()[0].id;
+        desenharTags();
+        desenharItens();
+      }, (e) => {
+        mostrarErro("Não foi possível ler as etiquetas (" + e.code + "). Atualize as regras do Firestore para liberar a coleção 'tags'.");
+      });
+
+      // ---- Itens ----
+      onSnapshot(query(itensCol), { includeMetadataChanges: true }, (snap) => {
+        $("dot").classList.toggle("on", !snap.metadata.fromCache);
+        $("status").textContent = snap.metadata.fromCache ? "Offline, será sincronizado" : "Sincronizado";
+        itens = snap.docs
+          .map((d) => { const v = d.data({ serverTimestamps: "estimate" }); return { id: d.id, ...v, _pos: posicao(v) }; })
+          .sort((a, b) => a._pos - b._pos);
+        if (arrastando) { pendente = true; return; }
+        desenharItens();
+      }, (e) => {
+        $("status").textContent = "Erro de conexão";
+        mostrarErro("Não foi possível ler a lista (" + e.code + "). Verifique as regras do Firestore e o firebaseConfig.");
+      });
+
+      function chip(texto, hex, ativo, onclick) {
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "chip"; b.textContent = texto;
+        b.setAttribute("aria-pressed", ativo ? "true" : "false");
+        if (hex) marcar(b, hex);
+        b.onclick = onclick;
+        return b;
+      }
+
+      function desenharTags() {
+        const D = donos(), E = extras();
+
+        const sd = $("selDono"); sd.innerHTML = "";
+        for (const t of D) sd.append(chip(t.nome, t.cor, t.id === donoNovo, () => { donoNovo = t.id; lembrar(t.id); desenharTags(); }));
+
+        $("linhaExtra").hidden = E.length === 0;
+        const se = $("selExtra"); se.innerHTML = "";
+        se.append(chip("Nenhuma", null, extraNovo === "", () => { extraNovo = ""; desenharTags(); }));
+        for (const t of E) se.append(chip(t.nome, null, t.id === extraNovo, () => { extraNovo = t.id; desenharTags(); }));
+
+        const fd = $("filDono"); fd.innerHTML = "";
+        fd.append(chip("Todos", null, filtroDono === "todos", () => { filtroDono = "todos"; desenharTags(); desenharItens(); }));
+        for (const t of D) fd.append(chip(t.nome, t.cor, filtroDono === t.id, () => { filtroDono = t.id; desenharTags(); desenharItens(); }));
+
+        $("linhaFilExtra").hidden = E.length === 0;
+        const fe = $("filExtra"); fe.innerHTML = "";
+        fe.append(chip("Todas", null, filtroExtra === "todas", () => { filtroExtra = "todas"; desenharTags(); desenharItens(); }));
+        for (const t of E) fe.append(chip(t.nome, null, filtroExtra === t.id, () => { filtroExtra = t.id; desenharTags(); desenharItens(); }));
+
+        // Painel (não reconstrói enquanto o usuário edita algo nele)
+        if ($("painel").contains(document.activeElement) && document.activeElement.tagName === "INPUT") return;
+        const cores = $("cores"); cores.innerHTML = "";
+        for (const t of D) {
+          const row = document.createElement("div"); row.className = "tag-linha";
+          const cor = document.createElement("input");
+          cor.type = "color"; cor.value = t.cor || "#999999";
+          cor.setAttribute("aria-label", "Cor de " + t.nome);
+          cor.addEventListener("change", () => updateDoc(doc(tagsCol, t.id), { cor: cor.value }));
+          const nome = document.createElement("span"); nome.className = "nome"; nome.textContent = t.nome;
+          row.append(cor, nome); cores.append(row);
+        }
+        const ex = $("extras"); ex.innerHTML = "";
+        if (!E.length) { const p = document.createElement("p"); p.className = "sec"; p.textContent = "Nenhuma ainda."; ex.append(p); }
+        for (const t of E) {
+          const row = document.createElement("div"); row.className = "tag-linha";
+          const nome = document.createElement("span"); nome.className = "nome"; nome.textContent = t.nome;
+          const del = document.createElement("button");
+          del.type = "button"; del.className = "link warn"; del.textContent = "Excluir";
+          del.onclick = () => {
+            if (confirm("Excluir a etiqueta \"" + t.nome + "\"? Os itens continuam na lista, sem essa etiqueta.")) deleteDoc(doc(tagsCol, t.id));
+          };
+          row.append(nome, del); ex.append(row);
+        }
+      }
+
+      function desenharItens() {
+        visiveis = itens.filter((i) =>
+          (filtroDono === "todos" || (donoDe(i) && donoDe(i).id === filtroDono)) &&
+          (filtroExtra === "todas" || extraIdDe(i) === filtroExtra));
+        const ul = $("lista"); ul.innerHTML = "";
+        const vazio = $("vazio");
+        vazio.hidden = visiveis.length > 0;
+        vazio.textContent = itens.length ? "Nenhum item com esse filtro." : "A lista está vazia. Adicione o primeiro item.";
+        ul.hidden = visiveis.length === 0;
+
+        for (const item of visiveis) {
+          const dono = donoDe(item), extra = extraDe(item);
           const li = document.createElement("li");
           li.dataset.id = item.id;
+          li.style.setProperty("--c", dono ? dono.cor : "#9aa7a1");
           if (item.feito) li.className = "done";
 
           const grip = document.createElement("span");
-          grip.className = "grip";
-          grip.textContent = "⋮⋮";
+          grip.className = "grip"; grip.textContent = "⋮⋮"; grip.title = "Arraste para reordenar";
           grip.setAttribute("aria-hidden", "true");
-          grip.title = "Arraste para reordenar";
 
           const cb = document.createElement("input");
-          cb.type = "checkbox";
-          cb.checked = !!item.feito;
+          cb.type = "checkbox"; cb.checked = !!item.feito;
           cb.setAttribute("aria-label", "Marcar " + item.texto);
-          cb.onchange = () => updateDoc(doc(itens, item.id), { feito: cb.checked });
+          cb.onchange = () => updateDoc(doc(itensCol, item.id), { feito: cb.checked });
 
-          const corpo = document.createElement("div");
-          corpo.className = "corpo";
-          const txt = document.createElement("span");
-          txt.className = "texto";
-          txt.textContent = item.texto;
+          const corpo = document.createElement("div"); corpo.className = "corpo";
+          const txt = document.createElement("span"); txt.className = "texto"; txt.textContent = item.texto;
           corpo.append(txt);
-          if (item.autor) {
-            const a = document.createElement("span");
-            a.className = "autor";
-            a.textContent = "Adicionado por " + item.autor;
-            corpo.append(a);
+          const nomeDono = dono ? dono.nome : item.autor;
+          if (nomeDono || extra) {
+            const meta = document.createElement("span"); meta.className = "meta";
+            if (nomeDono) {
+              const d = document.createElement("span"); d.className = "dono";
+              d.append(document.createElement("i"), document.createTextNode(nomeDono));
+              meta.append(d);
+            }
+            if (extra) {
+              const p = document.createElement("span"); p.className = "pill"; p.textContent = extra.nome;
+              meta.append(p);
+            }
+            corpo.append(meta);
           }
 
           const del = document.createElement("button");
-          del.className = "del";
-          del.type = "button";
-          del.textContent = "×";
+          del.className = "del"; del.type = "button"; del.textContent = "×";
           del.setAttribute("aria-label", "Remover " + item.texto);
-          del.onclick = () => deleteDoc(doc(itens, item.id));
+          del.onclick = () => deleteDoc(doc(itensCol, item.id));
 
           li.append(grip, cb, corpo, del);
           ul.append(li);
         }
       }
 
-      // ---- Reordenar arrastando (funciona com mouse e toque) ----
+      // ---- Reordenar arrastando ----
       Sortable.create($("lista"), {
-        handle: ".grip",
-        animation: 150,
-        ghostClass: "sortable-ghost",
+        handle: ".grip", animation: 150, ghostClass: "sortable-ghost",
         onStart: () => { arrastando = true; },
         onEnd: async (ev) => {
           arrastando = false;
-          const fim = () => { if (pendente) { desenhar(pendente); pendente = null; } };
+          const fim = () => { if (pendente) { pendente = false; desenharItens(); } };
           if (ev.oldIndex === ev.newIndex) return fim();
-
-          // Só o item movido recebe uma nova posição, entre os dois vizinhos.
           const ids = [...$("lista").children].map((li) => li.dataset.id);
           const i = ids.indexOf(ev.item.dataset.id);
-          const mapa = new Map(atual.map((x) => [x.id, x._pos]));
+          const mapa = new Map(visiveis.map((x) => [x.id, x._pos]));
           const antes = i > 0 ? mapa.get(ids[i - 1]) : null;
           const depois = i < ids.length - 1 ? mapa.get(ids[i + 1]) : null;
           let nova;
@@ -442,38 +666,44 @@
           else if (antes === null) nova = depois - 1000;
           else if (depois === null) nova = antes + 1000;
           else nova = (antes + depois) / 2;
-
-          try {
-            await updateDoc(doc(itens, ev.item.dataset.id), { ordem: nova });
-          } catch (err) {
-            mostrarErro("Não foi possível reordenar (" + err.code + ").");
-          }
+          try { await updateDoc(doc(itensCol, ev.item.dataset.id), { ordem: nova }); }
+          catch (err) { mostrarErro("Não foi possível reordenar (" + err.code + ")."); }
           fim();
         }
       });
 
+      // ---- Adicionar item ----
       $("form").addEventListener("submit", async (e) => {
         e.preventDefault();
         const texto = $("novo").value.trim();
         if (!texto) return;
-        if (!meuNome) pedirNome();
+        if (!donos().length) return mostrarErro("As etiquetas ainda não carregaram. Tente de novo em instantes.");
         $("novo").value = "";
         try {
-          await addDoc(itens, {
-            texto,
-            autor: meuNome || "",
-            feito: false,
-            ordem: Date.now(),      // novos itens entram no fim da lista
-            criadoEm: serverTimestamp()
+          await addDoc(itensCol, {
+            texto, tag: donoNovo, extra: extraNovo || null,
+            feito: false, ordem: Date.now(), criadoEm: serverTimestamp()
           });
-        } catch (err) {
-          mostrarErro("Não foi possível adicionar o item (" + err.code + ").");
-        }
+        } catch (err) { mostrarErro("Não foi possível adicionar o item (" + err.code + ")."); }
+        extraNovo = "";            // a etiqueta extra vale só para o item que acabou de ser criado
+        desenharTags();
         $("novo").focus();
       });
 
+      // ---- Criar etiqueta extra ----
+      $("formTag").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const nome = $("nomeNova").value.trim();
+        if (!nome) return;
+        try {
+          await addDoc(tagsCol, { nome, padrao: false, ordem: Date.now() });
+          $("nomeNova").value = "";
+        } catch (err) { mostrarErro("Não foi possível criar a etiqueta (" + err.code + ")."); }
+      });
+
+      // ---- Remover concluídos ----
       $("limpar").addEventListener("click", async () => {
-        const feitos = await getDocs(query(itens, where("feito", "==", true)));
+        const feitos = await getDocs(query(itensCol, where("feito", "==", true)));
         if (feitos.empty) return;
         if (!confirm("Remover " + feitos.size + " item(ns) concluído(s)?")) return;
         const batch = writeBatch(db);
@@ -481,16 +711,6 @@
         await batch.commit();
       });
     }
-
-    $("copiar").addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(location.href);
-        $("copiar").textContent = "Link copiado";
-      } catch {
-        prompt("Copie o link da lista:", location.href);
-      }
-      setTimeout(() => ($("copiar").textContent = "Copiar link da lista"), 2000);
-    });
   </script>
 </body>
 
